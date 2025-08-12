@@ -1,3 +1,17 @@
+
+# Grocery App
+
+## Description
+This app is designed to simplify grocery shopping by allowing users to search for products, add them to a virtual cart, and track purchased items. Instead of writing items on paper, users can:
+
+- Search for grocery products in the app
+- Add products to a virtual cart
+- Mark products as bought while shopping
+- Complete their shopping and store purchased items in a history list
+- Use an integrated AI chat agent to identify products and automatically add items to the cart
+
+The app streamlines the shopping experience and helps users keep track of their purchases efficiently.
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).

@@ -1,75 +1,104 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import Item from "@/app/components/items";
+import { useContext, useEffect, useState } from "react";
+import { SafeAreaView, ScrollView, Text, TextInput, View } from "react-native";
+import { context } from "../_layout";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const test = [{'id': '12', 'name': 'pesara pappu | moong dal', 'url': 'pesara_pappu.jpg', 'itemform': 'raw', 'quantity': 1, 'weight': 100}, {'id': '18', 'name': 'senaga pappu | channa dal', 'url': 'senaga_pappu.jpg', 'itemform': 'raw', 'quantity': 1, 'weight': 100}, {'id': '11', 'name': 'vedaka popular toor dal | kandipappu', 'url': 'kandipappu.jpg', 'itemform': 'raw', 'quantity': 1, 'weight': 100}, {'id': '13', 'name': 'no preservatives whole moong | pesalu', 'url': 'pesalu.jpg', 'itemform': 'raw', 'quantity': 1, 'weight': 100}, {'id': '8', 'name': 'bague premium whole methi seeds dana fenugreek seed | menthulu', 'url': 'menthulu.jpg', 'itemform': 'raw', 'quantity': 1, 'weight': 100}]
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+
+// Assuming itemTypes is defined in your context and looks like this:
+
+
+export default function Index() {
+  const {main_items,setMain,search_items,setSearch,setCart,cart_items,address} = useContext(context);
+  const [current_search,setCurrentSearch] = useState("");
+
+  const _search = async (text:string) => {
+      setCurrentSearch(text)
+    try {
+          const response = await fetch(`${address}/search`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              search: text
+            })
+          });
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          // console.log('Success:', data);
+          const payload = data.message.payload;
+          setSearch(payload)
+    } catch (err) {
+          console.error('Fetch error:', err);
+    }
+  };
+
+  useEffect(()=>{
+      const fetch_val = async () => {
+        try {
+          const response = await fetch(`${address}/default`);
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          // console.log('Success:', data);
+          const payload = data.message.payload;
+          setMain(payload)
+        } catch (err) {
+          console.error('Fetch error:', err);
+        }
+      };
+      fetch_val();
+    },[setMain,address])
+  return<SafeAreaView className="flex-1 bg-black pt-10 pl-4 pr-4">
+    <ScrollView contentContainerStyle={{
+      paddingBottom:85
+    }} >
+      <View className="flex justify-center items-center p-10">
+        <TextInput 
+          placeholder="Search"
+          onChangeText={(text)=>_search(text)}
+          defaultValue={current_search}
+          className={`${'placeholder:text-gray-400'} h-[50px] w-[230px] rounded-md text-white border-2 active:border-orange-400 text-xl border-gray-400 font-semibold px-3`}
+          maxLength={40}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+      </View>
+      {current_search && <Text className="pb-5 text-2xl font-bold text-white">For Search : {current_search}</Text>}
+      {search_items.length > 0 && current_search !==""
+        ?
+        <View className="flex w-full">
+          <ScrollView contentContainerStyle={{
+            display:'flex',
+            justifyContent:'center',
+            alignItems:'center',
+            flexWrap:'wrap',
+            flexDirection:'row',
+            gap:13
+          }}>
+             {search_items.map((item)=>(
+               <Item key={item.id} item={item}  />
+             ))}
+           </ScrollView>
+         </View>
+        :
+        <View className="flex w-full">
+          {main_items.length > 0 ? <ScrollView contentContainerStyle={{
+            display:'flex',
+            justifyContent:'center',
+            alignItems:'center',
+            flexWrap:'wrap',
+            flexDirection:'row',
+            gap:13
+          }}>
+             {main_items.map((item)=>(
+               <Item key={item.id} item={item} />
+             ))}
+          </ScrollView> : <Text className="text-center font-bold text-yellow-300">Please wait...</Text>}
+      </View>}
+    </ScrollView>
+  </SafeAreaView>
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
